@@ -31,10 +31,10 @@ LIBS    += /home/sama/Documents/clBP/libclBP.a /home/sama/Documents/enkiSimulato
 RESOURCES +=
 
 
-copydata.commands = $(COPY_DIR) $$PWD/cc.png $$OUT_PWD
+#copydata.commands = $(COPY_DIR) $$PWD/cc.png $$OUT_PWD
 
-first.depends = $(first) copydata
-export(first.depends)
-export(copydata.commands)
-QMAKE_EXTRA_TARGETS += first copydata
+#first.depends = $(first) copydata
+#export(first.depends)
+#export(copydata.commands)
+#QMAKE_EXTRA_TARGETS += first copydata
 
