@@ -56,6 +56,8 @@ It has also a camera which looks to the front and IR sensors
 #include "bandpass.h"
 #include "parameters.h"
 
+
+//#define experimentSweep
 #define learning
 //#define reflex
 
@@ -68,14 +70,28 @@ double	maxy = 250;
 int countSteps=0;
 int countRuns=0;
 int learningRateCount =0;
+
+#ifdef experimentSweep
 bool save = false;
+#endif
+
+#ifndef experimentSweep
+bool save = true;
+#endif
+
+
 
     int nInputs= ROW1N+ROW2N+ROW3N; //this cannot be an odd number for icoLearner
 #ifdef learning
     int nPredictors=nInputs/2;
     int nFilters = NFILTERS;
+#ifdef experimentSweep
     double learningRate= LEARNINGRATE;
+#endif
 
+#ifndef experimentSweep
+    double learningRate= DESIREDLEARNINGRATE;
+#endif
 #endif
 
 class EnkiPlayground : public EnkiWidget
@@ -99,11 +115,8 @@ protected:
 
     FILE** filtlog = NULL;
     FILE* predlog = NULL;
-    FILE* w1log = NULL;
-    FILE* w2log = NULL;
-    FILE* w3log = NULL;
-    FILE* wlog = NULL;
     FILE* stats = NULL;
+    FILE* wlog = NULL;
 #endif
     FILE* errorlog = NULL;
     FILE* fcoord = NULL;
@@ -119,15 +132,12 @@ public:
         filtlog[2]= fopen("fp3.tsv","wt");
         filtlog[3]= fopen("fp4.tsv","wt");
         filtlog[4]= fopen("fp5.tsv","wt");
-
         errorlog = fopen("errorLearning.tsv","wt");
         fcoord = fopen("coordLearning.tsv","wt");
         predlog = fopen("predictors.tsv","wt");
-        wlog = fopen("wch.tsv","wt");
-        w1log = fopen("wch1.tsv","wt");
-        w2log = fopen("wch2.tsv","wt");
-        w3log = fopen("wch3.tsv","wt");
         stats = fopen("stats.tsv", "wt");
+        wlog = fopen("weight_distances.tsv", "wt");
+
 #endif
 #ifdef reflex
         errorlog = fopen("errorReflex.tsv","wt");
@@ -195,7 +205,6 @@ public:
         fclose(fcoord);
         fclose(errorlog);
 #ifdef learning
-        fclose(wlog);
         fclose(stats);
         fclose(predlog);
         fclose(filtlog[0]);
@@ -210,9 +219,11 @@ public:
     }
 	// here we do all the behavioural computations
 	// as an example: line following and obstacle avoidance
-	virtual void sceneCompletedHook()
-	{
 
+
+
+virtual void sceneCompletedHook()
+	{
         int errorGain = ERRORGAIN;
 
 		double leftGround = racer->groundSensorLeft.getValue();
@@ -220,7 +231,6 @@ public:
         double error = (leftGround - rightGround);
 
 #ifdef learning
-        //cout << learningRateCount << "      and      " << save << endl;
         if (learningRate == DESIREDLEARNINGRATE && save == true){
             //cout<< "Saving the POSITIONS with learning rate: " << learningRate <<endl;
             fprintf(fcoord,"%e\t%e\n",racer->pos.x,racer->pos.y);
@@ -231,15 +241,14 @@ public:
             fprintf(fcoord,"%e\t%e\n",racer->pos.x,racer->pos.y);
         }
 #endif
-
         fprintf(errorlog, "%e\t", error);
-
         error = error * errorGain;
 
 #ifdef reflex
         racer->leftSpeed  = speed + error;
         racer->rightSpeed = speed - error;
 #endif
+
 #ifdef learning
         int predGain = PREDGAIN;
         for(int i=0; i<nInputs; i++) {
@@ -291,21 +300,26 @@ public:
         double leadError=error;
         net->setError(leadError);
         net->propError();
+        net->setErrorAtInput(leadError);
+        net->propErrorForward();
         net->updateWeights();
-        double weightDistance1=net->getLayerWeightDistance(0);
-        double weightDistance2=net->getLayerWeightDistance(1);
-        double weightDistance3=net->getLayerWeightDistance(2);
+        for (int i = 0; i <NLAYERS; i++){
+          fprintf(wlog, "%e\t", net->getLayerWeightDistance(i));
+        }
+        fprintf(wlog, "%e\n", net->getWeightDistance());
+
         if (learningRate== DESIREDLEARNINGRATE && save == true){
             //cout<< "Saving the WEIGHTS with learning rate: " << learningRate <<endl;
-            net->saveWeights();
-            fprintf(wlog, "%e\t%e\t%e\n", weightDistance1,weightDistance2,weightDistance3);
+            //net->saveWeights();
+            //fprintf(wlog, "%e\t%e\t%e\n", weightDistance1,weightDistance2,weightDistance3);
         }
         double Output= net->getOutput(0);
-        double OutputSum= net->getSumOutput(0);
         double error2 = error + Output * Netgain;
         racer->leftSpeed  = speed + error2;
         racer->rightSpeed = speed - error2;
 #endif
+
+#ifdef experimentSweep
         countSteps ++;
         if (countSteps == STEPSCOUNT){
             //cout << save << endl;
@@ -329,7 +343,7 @@ public:
                 cout<< "learning rate is: "<< learningRate<< " now!"<< endl;
                 if (learningRate == DESIREDLEARNINGRATE){
                     save = true;
-                    cout<< "Saving now"<<endl;
+                    cout<< "Saving now" <<endl;
                 }
                 if (learningRateCount == LEARNINGRATECOUNT){
                     qApp->quit();
@@ -341,6 +355,7 @@ public:
 #endif
             }
         }
+#endif
 	}
 };
 
