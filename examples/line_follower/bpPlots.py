@@ -23,29 +23,29 @@ plt.close("all")
 
 
 #%%
-error=np.loadtxt('{}error.tsv'.format(path));
-#minE=min(error); maxE=max(abs(error))
-errorNorm=error #/maxE
-errorfig=plt.figure('error', figsize=(3,1),dpi=my_dpi)
-axe=errorfig.add_subplot(111)
-plt.plot(error, color='black', linestyle="-", linewidth=0.5)
-plt.ylim(-0.3, 0.3)
-plt.yticks([-0.2, -0.1, 0, 0.1, 0.2])
-plt.xticks(np.arange(0,len(error),250))
-axe.set_aspect(aspect=len(error)/(.6*3))
-errorfig.savefig(spath+'error_signal', quality= 100, format='svg', bbox_inches='tight')
-plt.show()
+#error=np.loadtxt('{}error.tsv'.format(path));
+##minE=min(error); maxE=max(abs(error))
+#errorNorm=error #/maxE
+#errorfig=plt.figure('error', figsize=(3,1),dpi=my_dpi)
+#axe=errorfig.add_subplot(111)
+#plt.plot(error, color='black', linestyle="-", linewidth=0.5)
+#plt.ylim(-0.3, 0.3)
+#plt.yticks([-0.2, -0.1, 0, 0.1, 0.2])
+#plt.xticks(np.arange(0,len(error),250))
+#axe.set_aspect(aspect=len(error)/(.6*3))
+#errorfig.savefig(spath+'error_signal', quality= 100, format='svg', bbox_inches='tight')
+#plt.show()
 
 #%%
 
-#coofig=plt.figure('coordinates', figsize=(1,1), dpi=my_dpi)
-#coorddata=np.loadtxt('coord.tsv');
-#img=mpimg.imread('ccg.png')
-#imgplot = plt.imshow(img)
-#plt.plot((coorddata[:,0])*4, 1000-(coorddata[:,1])*4, color='black', linestyle="--", linewidth=0.5)
-##plt.scatter(4*[0,160,0,160], 4*[0,0,200,200], color='black')
-#coofig.savefig(spath+'coord', quality=100, format='svg', bbox_inches='tight')
-#plt.show()
+coofig=plt.figure('coordinates', figsize=(1,1), dpi=my_dpi)
+coorddata=np.loadtxt('coordReflex.tsv');
+img=mpimg.imread('ccg.png')
+imgplot = plt.imshow(img)
+plt.plot((coorddata[:,0])*4, 1000-(coorddata[:,1])*4, color='black', linestyle="--", linewidth=0.5)
+#plt.scatter(4*[0,160,0,160], 4*[0,0,200,200], color='black')
+coofig.savefig(spath+'coordReflex', quality=100, format='svg', bbox_inches='tight')
+plt.show()
 
 #%%
 
