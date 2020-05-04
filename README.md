@@ -36,3 +36,8 @@ To compile the examples you need to do again `qmake` and `make`. This uses the
 previously compiled enki library.
 
 To run it type, for example, `./playground`
+
+## Citation
+
+[![DOI](https://zenodo.org/badge/234632641.svg)](https://zenodo.org/badge/latestdoi/234632641)
+
