@@ -47,12 +47,9 @@ It has also a camera which looks to the front and IR sensors
 #include <sstream>
 #include <iomanip>
 #include "Racer.h"
-//#include "cldl/Neuron.h"
-//#include "cldl/Layer.h"
-//#include "cldl/Net.h"
-//#include "../lib/Net.cpp"
-//#include "../lib/Layer.cpp"
-//#include "../lib/Neuron.cpp"
+#include "cldl/Neuron.h"
+#include "cldl/Layer.h"
+#include "cldl/Net.h"
 #include "bandpass.h"
 #include "parameters.h"
 #include <chrono>
@@ -192,15 +189,16 @@ public:
 
         int NetnInputs = nPredictors * nFilters;
         int nLayers= NLAYERS;
-        int nNeurons[nLayers]={N1,N2,N3,N4,N5,N6,N7,N8,N9,N10,N11};
+        int nNeurons[11]={N1,N2,N3,N4,N5,N6,N7,N8,N9,N10,N11};
         int* nNeuronsp=nNeurons;
-        net = new Net(nLayers, nNeuronsp, NetnInputs);
+        net = new Net(nLayers, nNeuronsp, NetnInputs, 2); // the last argument defines how many error propagations the network will perform
         net->initNetwork(Neuron::W_RANDOM, Neuron::B_NONE, Neuron::Act_Sigmoid);
         net->setLearningRate(learningRate);
         cout << "learning rate is: "<< learningRate<< " now!" << endl;
         pred = new double[nInputs];
         diffpred = new double[nPredictors];
         fprintf(stats, "%d\n", nPredictors);
+
         for (int i=0; i<nLayers; i++){
             fprintf(stats, "%d\n", nNeurons[i]);
         }
@@ -317,28 +315,16 @@ virtual void sceneCompletedHook()
 
         double leadError=error;
 
-//        net->setForwardError(leadError);
-//        net->propErrorForward();
-//        net->setMidError(5,leadError);
-//        net->propMidErrorForward();
-//        net->propMidErrorBackward();
+//        std::vector<int> injectionLayers;
+//            injectionLayers.reserve(7);
+//            injectionLayers = {8,9,2,6,3,5,0};
 
-#define BackProp
-#ifdef localProp
-        net->setErrorCoeff(0,0,0,0,1,0);
-        net->setGlobalError(leadError);
-        net->propGlobalErrorBackwardLocally();
-        net->updateWeights();
-        for (int i = 0; i <NLAYERS; i++){
-          fprintf(wlog, "%e\t", net->getLayerWeightDistance(i));
-        }
-        fprintf(wlog, "%e\n", net->getWeightDistance());
-#endif
-
-#ifdef BackProp
-        net->setErrorCoeff(0,1,0,0,0,0);
-        net->setBackwardError(leadError);
-        net->propErrorBackward();
+//        net->masterPropagate(injectionLayers, 0,
+//                                     Net::BACKWARD, leadError,
+//                                     Neuron::Sign);
+//        net->masterPropagate(injectionLayers, 1,
+//                                     Net::FORWARD, leadError,
+//                                     Neuron::Absolute);
         net->updateWeights();
         for (int i = 0; i <NLAYERS; i++){
           fprintf(wlog, "%e\t", net->getLayerWeightDistance(i));
@@ -349,43 +335,6 @@ virtual void sceneCompletedHook()
 //            system_clock::now().time_since_epoch()
 //        );
 //        cout << "time is: " << ms.count() << endl;
-#endif
-#ifdef echo
-        net->setErrorCoeff(0,0,0,0,0,1);
-        net->setEchoError(leadError);
-        while (net->getLayer(NLAYERS-1)->getEchoError(0) != 0){
-            net->echoErrorBackward();
-            net->updateWeights();
-//            for (int i = 0; i <NLAYERS; i++){
-//              fprintf(wlog, "%e\t", net->getLayerWeightDistance(i));
-//            }
-//            fprintf(wlog, "%e\n", net->getWeightDistance());
-            net->echoErrorForward();
-            net->updateWeights();
-//            for (int i = 0; i <NLAYERS; i++){
-//              fprintf(wlog, "%e\t", net->getLayerWeightDistance(i));
-//            }
-//            fprintf(wlog, "%e\n", net->getWeightDistance());
-//            cout << "Echo Error is: " << net->getLayer(NLAYERS-1)->getEchoError(0) << endl;
-        }
-        for (int i = 0; i <NLAYERS; i++){
-          fprintf(wlog, "%e\t", net->getLayerWeightDistance(i));
-        }
-        fprintf(wlog, "%e\n", net->getWeightDistance());
-//        cout << "Echo Error is: " << net->getLayer(NLAYERS-1)->getEchoError(0) << endl;
-//        if(net->getLayer(NLAYERS-1)->getEchoError(0) == 0){
-//            cout << "dw = 0" << endl;
-//            for (int i = 0; i <NLAYERS; i++){
-//              fprintf(wlog, "%e\t", net->getLayerWeightDistance(i));
-//            }
-//            fprintf(wlog, "%e\n", net->getWeightDistance());
-//        }
-#endif
-        //double explodingBackwardError = net->getGradient(Neuron::onBackwardError, Layer::exploding);
-        //double averageBackwardError = net->getGradient(Neuron::onBackwardError, Layer::average);
-        //double vanishingBackwardError = net->getGradient(Neuron::onBackwardError, Layer::vanishing);
-
-        //fprintf(gradientlog, "%e\t%e\t%e\n", explodingBackwardError, averageBackwardError, vanishingBackwardError);
 
         if (learningRate== DESIREDLEARNINGRATE && save == true){
             //cout<< "Saving the WEIGHTS with learning rate: " << learningRate <<endl;

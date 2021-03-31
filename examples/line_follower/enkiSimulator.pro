@@ -2,11 +2,7 @@ TEMPLATE = app
 TARGET = enkisimulator
 INCLUDEPATH += .
 
-#INCLUDEPATH += /usr/local/include/enki
-#INCLUDEPATH += /home/sama/Documents/CLDL/include
-
-INCLUDEPATH += add enki include path
-INCLUDEPATH += add clbp include path
+INCLUDEPATH += /usr/local/include/enki
 
 # Input
 HEADERS += Racer.h \
@@ -23,18 +19,13 @@ CONFIG          += qt warn_on debuge debug
 QMAKE_CXXFLAGS += -std=c++0x -march=native -Wunused -pedantic -lenki
 QMAKE_LFLAGS += -lenki
 
-#LIBS    += /home/sama/Documents/CLDL/libCLDL.a /home/sama/Documents/enkiSimulator/enki/libenki.a
+LIBS	+= /usr/local/lib/libenki.a
+LIBS	+= /usr/local/lib/libcldl_static.a
 
-LIBS    += add libenki.a path here
-LIBS    += add libclBP.a path here
+copydata.commands = $(COPY_DIR) $$PWD/cc.png $$OUT_PWD
 
-RESOURCES +=
-
-
-#copydata.commands = $(COPY_DIR) $$PWD/cc.png $$OUT_PWD
-
-#first.depends = $(first) copydata
-#export(first.depends)
-#export(copydata.commands)
-#QMAKE_EXTRA_TARGETS += first copydata
+first.depends = $(first) copydata
+export(first.depends)
+export(copydata.commands)
+QMAKE_EXTRA_TARGETS += first copydata
 
