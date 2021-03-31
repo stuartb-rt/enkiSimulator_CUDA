@@ -47,12 +47,12 @@ It has also a camera which looks to the front and IR sensors
 #include <sstream>
 #include <iomanip>
 #include "Racer.h"
-#include "cldl/Neuron.h"
-#include "cldl/Layer.h"
-#include "cldl/Net.h"
-#include "../lib/Net.cpp"
-#include "../lib/Layer.cpp"
-#include "../lib/Neuron.cpp"
+//#include "cldl/Neuron.h"
+//#include "cldl/Layer.h"
+//#include "cldl/Net.h"
+//#include "../lib/Net.cpp"
+//#include "../lib/Layer.cpp"
+//#include "../lib/Neuron.cpp"
 #include "bandpass.h"
 #include "parameters.h"
 #include <chrono>
@@ -109,23 +109,23 @@ protected:
 
 #ifdef learning
     Net* net;
-    double* pred = NULL;
-    double* diffpred = NULL;
+    double* pred = nullptr;
+    double* diffpred = nullptr;
 
     Bandpass*** bandpass = 0;
     double minT = MINT;
     double maxT = MAXT;
     double dampingCoeff = DAMPINGCOEFF;
 
-    FILE** filtlog = NULL;
-    FILE* predlog = NULL;
-    FILE* stats = NULL;
-    FILE* wlog = NULL;
-    FILE* gradientlog = NULL;
+    FILE** filtlog = nullptr;
+    FILE* predlog = nullptr;
+    FILE* stats = nullptr;
+    FILE* wlog = nullptr;
+    FILE* gradientlog = nullptr;
 #endif
-    FILE* errorlog = NULL;
-    FILE* fcoord = NULL;
-    FILE* fspeed = NULL;
+    FILE* errorlog = nullptr;
+    FILE* fcoord = nullptr;
+    FILE* fspeed = nullptr;
 
 public:
     EnkiPlayground(World *world, QWidget *parent = 0):
@@ -164,7 +164,7 @@ public:
         bandpass = new Bandpass**[nPredictors];
 
         for(int i=0;i<nPredictors;i++) {
-            if (bandpass != NULL) {
+            if (bandpass != nullptr) {
                 bandpass[i] = new Bandpass*[nFilters];
                  double fs = 1;
                  double fmin = fs/maxT;
@@ -197,7 +197,7 @@ public:
         net = new Net(nLayers, nNeuronsp, NetnInputs);
         net->initNetwork(Neuron::W_RANDOM, Neuron::B_NONE, Neuron::Act_Sigmoid);
         net->setLearningRate(learningRate);
-        cout<< "learning rate is: "<< learningRate<< " now!"<< endl;
+        cout << "learning rate is: "<< learningRate<< " now!" << endl;
         pred = new double[nInputs];
         diffpred = new double[nPredictors];
         fprintf(stats, "%d\n", nPredictors);
@@ -345,10 +345,10 @@ virtual void sceneCompletedHook()
         }
         fprintf(wlog, "%e\n", net->getWeightDistance());
 
-        milliseconds ms = duration_cast< milliseconds >(
-            system_clock::now().time_since_epoch()
-        );
-        cout << "time is: " << ms.count() << endl;
+//        milliseconds ms = duration_cast< milliseconds >(
+//            system_clock::now().time_since_epoch()
+//        );
+//        cout << "time is: " << ms.count() << endl;
 #endif
 #ifdef echo
         net->setErrorCoeff(0,0,0,0,0,1);
