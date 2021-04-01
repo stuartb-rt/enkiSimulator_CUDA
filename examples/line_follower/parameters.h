@@ -3,10 +3,15 @@
 
 #endif // PARAMETERS_H
 
-#define STEPSCOUNT 10000
-#define RUNSCOUNT 10
-
+#define STEPSCOUNT 100
 #define LEARNINGRATECOUNT 5
+// Network Structure
+#define LEARNINGRATE 0.01
+
+#define NLAYERS 3
+    #define N1 6
+    #define N2 4
+    #define N3 2
 
 // Predictor Array
 #define ROW1P 12
@@ -30,15 +35,6 @@
 #define MINT 3 //3
 #define MAXT 10 //10
 #define DAMPINGCOEFF 0.51
-
-// Network Structure
-#define StartLEARNINGRATE 0.1
-#define DESIREDLEARNINGRATE 0.01
-
-#define NLAYERS 3
-    #define N1 6
-    #define N2 4
-    #define N3 2
 
 // Robot speed
 #define SPEED 30 // for reflex it is 60

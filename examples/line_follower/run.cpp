@@ -54,7 +54,7 @@ It has also a camera which looks to the front and IR sensors
 #include "parameters.h"
 #include <chrono>
 
-//#define experimentSweep
+
 #define learning
 //#define reflex
 
@@ -66,71 +66,52 @@ double	maxx = 250;
 double	maxy = 250;
 
 int countSteps=0;
-int countRuns=0;
-int learningRateCount =0;
-int firstStep =1; //so that it does propInputs once and then back/forth in that order
-
-#ifdef experimentSweep
-bool save = false;
-#endif
-
-#ifndef experimentSweep
-bool save = true;
-#endif
-    int nInputs= ROW1N+ROW2N+ROW3N; //this cannot be an odd number for icoLearner
+int firstStep = 1; //so that it does propInputs once and then back/forth in that order
+int nInputs= ROW1N+ROW2N+ROW3N;
 #ifdef learning
-#ifndef PRED_DIFF
     int nPredictors=nInputs;
-#endif
-#ifdef PRED_DIFF
-    int nPredictors=nInputs/2;
-#endif
-    int nFilters = NFILTERS;
-#ifdef experimentSweep
-    double learningRate= StartLEARNINGRATE;
-#endif
-
-#ifndef experimentSweep
-    double learningRate= DESIREDLEARNINGRATE;
-#endif
 #endif
 
 class EnkiPlayground : public EnkiWidget
 {
 protected:
 	Racer* racer;
-    double speed = SPEED;
-    double prevX;
-    double prevY;
-    double prevA;
+    double speed = SPEED, prevX, prevY, prevA;
+    FILE* errorlog = nullptr;
+    FILE* fcoord = nullptr;
+    FILE* fspeed = nullptr;
 
 #ifdef learning
     Net* net;
     double* pred = nullptr;
-    double* diffpred = nullptr;
-
     Bandpass*** bandpass = 0;
-    double minT = MINT;
-    double maxT = MAXT;
-    double dampingCoeff = DAMPINGCOEFF;
-
-
+    double minT = MINT, maxT = MAXT, dampingCoeff = DAMPINGCOEFF;
     FILE** filtlog = nullptr;
     FILE* predlog = nullptr;
     FILE* stats = nullptr;
     FILE* wlog = nullptr;
     FILE* gradientlog = nullptr;
 #endif
-    FILE* errorlog = nullptr;
-    FILE* fcoord = nullptr;
-    FILE* fspeed = nullptr;
+
 
 public:
     EnkiPlayground(World *world, QWidget *parent = 0):
 		EnkiWidget(world, parent)
 	{
+        racer = new Racer(nInputs);
+        racer->pos = Point(maxx/2 +30, maxy/2 +5); // x and y of the start point
+        racer->leftSpeed = speed;
+        racer->rightSpeed = speed;
+        world->addObject(racer);
+
+#ifdef reflex
+        errorlog = fopen("errorReflex.tsv","wt");
+        fcoord = fopen("coordReflex.tsv","wt");
+        fspeed = fopen ("speedsReflex.tsv","wt");
+#endif
+
 #ifdef learning
-        filtlog = new FILE*[nFilters];
+        filtlog = new FILE*[NFILTERS];
         filtlog[0]= fopen("fp1.tsv","wt");
         filtlog[1]= fopen("fp2.tsv","wt");
         filtlog[2]= fopen("fp3.tsv","wt");
@@ -143,34 +124,20 @@ public:
         wlog = fopen("weight_distances.tsv", "wt");
         gradientlog = fopen("gradient.tsv","wt");
         fspeed = fopen ("speeds.tsv","wt");
-#endif
-#ifdef reflex
-        errorlog = fopen("errorReflex.tsv","wt");
-        fcoord = fopen("coordReflex.tsv","wt");
-#endif
-        racer = new Racer(nInputs);
-        racer->pos = Point(maxx/2 +30, maxy/2 +5); // x and y of the start point
-		racer->leftSpeed = speed;
-		racer->rightSpeed = speed;
-        world->addObject(racer);
-
-#ifdef learning
         racer->setPreds(ROW1P,ROW1N,ROW1S);
         racer->setPreds(ROW2P,ROW2N,ROW2S);
         racer->setPreds(ROW3P,ROW3N,ROW3S);
-
         bandpass = new Bandpass**[nPredictors];
-
         for(int i=0;i<nPredictors;i++) {
             if (bandpass != nullptr) {
-                bandpass[i] = new Bandpass*[nFilters];
+                bandpass[i] = new Bandpass*[NFILTERS];
                  double fs = 1;
                  double fmin = fs/maxT;
                  double fmax = fs/minT;
-                 double df = (fmax-fmin)/((double)(nFilters-1));
+                 double df = (fmax-fmin)/((double)(NFILTERS-1));
                  double f = fmin;
 
-                for(int j=0;j<nFilters;j++) {
+                for(int j=0;j<NFILTERS;j++) {
                     bandpass[i][j] = new Bandpass();
                     bandpass[i][j]->setParameters(f,dampingCoeff);
                     f = f + df;
@@ -187,30 +154,24 @@ public:
                 }
             }
         }
-
-
-
-        int NetnInputs = nPredictors * nFilters;
+        int NetnInputs = nPredictors * NFILTERS;
         int nLayers= NLAYERS;
         int nNeurons[NLAYERS]={N1,N2,N3};
         int* nNeuronsp=nNeurons;
         net = new Net(nLayers, nNeuronsp, NetnInputs, 2);
         net->initNetwork(Neuron::W_RANDOM, Neuron::B_NONE, Neuron::Act_Sigmoid);
-        net->setLearningRate(learningRate);
-        cout << "learning rate is: "<< learningRate<< " now!" << endl;
+        net->setLearningRate(LEARNINGRATE);
         pred = new double[nInputs];
-        diffpred = new double[nPredictors];
         fprintf(stats, "%d\n", nPredictors);
-
         for (int i=0; i<nLayers; i++){
             fprintf(stats, "%d\n", nNeurons[i]);
         }
 #endif
     }
-
     ~EnkiPlayground(){
         fclose(fcoord);
         fclose(errorlog);
+        fclose(fspeed);
 #ifdef learning
         fclose(stats);
         fclose(predlog);
@@ -220,38 +181,16 @@ public:
         fclose(filtlog[3]);
         fclose(filtlog[4]);
         fclose(gradientlog);
-        fclose(fspeed);
         delete[] pred;
-        delete[] diffpred;
 #endif
-
     }
-	// here we do all the behavioural computations
-	// as an example: line following and obstacle avoidance
-
-
 
 virtual void sceneCompletedHook()
 	{
-        int errorGain = ERRORGAIN;
-
 		double leftGround = racer->groundSensorLeft.getValue();
 		double rightGround = racer->groundSensorRight.getValue();
-        double error = (leftGround - rightGround);
-
-#ifdef learning
-        if (learningRate == DESIREDLEARNINGRATE && save == true){
-            //cout<< "Saving the POSITIONS with learning rate: " << learningRate <<endl;
-            fprintf(fcoord,"%e\t%e\n",racer->pos.x,racer->pos.y);
-        }
-#endif
-#ifdef reflex
-        if (countRuns==0){
-            fprintf(fcoord,"%e\t%e\n",racer->pos.x,racer->pos.y);
-        }
-#endif
+        double error = (leftGround - rightGround) * ERRORGAIN;
         fprintf(errorlog, "%e\t", error);
-        error = error * errorGain;
 
 #ifdef reflex
         racer->leftSpeed  = speed + error;
@@ -259,145 +198,66 @@ virtual void sceneCompletedHook()
 #endif
 
 #ifdef learning
-        int predGain = PREDGAIN;
         for(int i=0; i<nInputs; i++) {
-            pred[i] = - (racer->groundSensorArray[i]->getValue()); //getSensorArrayValue(i);
             // workaround of a bug in Enki
-//            cout<<"PRED value is: "<<pred[i]<<endl;
+            pred[i] = - (racer->groundSensorArray[i]->getValue()) * PREDGAIN;
             if (pred[i]<0) pred[i] = 0;
-            //if (i>=racer->getNsensors()/2) fprintf(stderr,"%e ",pred[i]);
-        }
-
-#ifdef PRED_DIFF
-        /* using the difference of the two predictors as the input: */
-        for (int i=0; i<ROW1N/2; i++){
-            diffpred[i]=(pred[ROW1N-1-i]-pred[i]);
-        }
-        for (int i=0; i<ROW2N/2; i++){
-            diffpred[i+ROW1N/2]= (pred[ROW2N+ROW1N-1-i]-pred[i+ROW1N]);
-        }
-        for (int i=0; i<ROW3N/2; i++){
-            diffpred[i+ROW1N/2+ROW2N/2]= (pred[ROW3N+ROW2N+ROW1N-1-i]-pred[i+ROW1N+ROW2N]);
-        }
-#endif
-#ifndef PRED_DIFF
-        for (int i=0; i<nInputs; i++){
-            diffpred[i]= pred[i];
-        }
-#endif
-        if (learningRate == DESIREDLEARNINGRATE && save == true){
-            //cout<< "Saving the PREDICTORS with learning rate: " << learningRate <<endl;
-            for(int i=0; i<nPredictors; i++) {
-                fprintf(predlog,"%e\t",diffpred[i]);
-            }
-            fprintf(predlog,"\n");
-        }
-        double pred_filtered[nPredictors][nFilters];
+        }       
+        double pred_filtered[nPredictors][NFILTERS];
         for (int i=0; i<nPredictors; i++){
-            for (int j=0; j<nFilters; j++){
-                pred_filtered[i][j]=bandpass[i][j]->filter(diffpred[i]);
-                if (learningRate == DESIREDLEARNINGRATE && save == true){
-                    fprintf(filtlog[j],"%e\t",pred_filtered[i][j]);
-                }
-                pred_filtered[i][j]= predGain * pred_filtered[i][j];
-            }
-        }
-        if (learningRate == DESIREDLEARNINGRATE && save == true){
-            //cout<< "Saving the FILTERS with learning rate: " << learningRate <<endl;
-            for (int i=0; i<nFilters; i++){
-                fprintf(filtlog[i],"\n");
+            for (int j=0; j<NFILTERS; j++){
+                pred_filtered[i][j]=bandpass[i][j]->filter(pred[i]);
             }
         }
         double* pred_pointer= pred_filtered[0];
-        int Netgain=NETWORKGAIN;
+
         if (firstStep == 1){
             net->setInputs(pred_pointer);
             net->propInputs();
             firstStep = 0;
         }
 
-        double leadError=error;
-
         std::vector<int> injectionLayers;
             injectionLayers.reserve(NLAYERS);
             injectionLayers = {2,1,0};
 
         net->masterPropagate(injectionLayers, 0,
-                                     Net::BACKWARD, leadError,
+                                     Net::BACKWARD, error,
                                      Neuron::Sign);
         net->masterPropagate(injectionLayers, 1,
-                                     Net::FORWARD, leadError,
+                                     Net::FORWARD, error,
                                      Neuron::Absolute);
         net->updateWeights();
+        net->setInputs(pred_pointer);
+        net->propInputs();
+
+        double Output= net->getOutput(0) + 2 * net->getOutput(1);
+        double error2 = error + Output * NETWORKGAIN;
+        racer->leftSpeed  = speed + error2;
+        racer->rightSpeed = speed - error2;
+
+        // save to files:
+        for(int i=0; i<nPredictors; i++) {
+            fprintf(predlog,"%e\t",pred[i]);
+        }
+        fprintf(predlog,"\n");
+        for (int i=0; i<NFILTERS; i++){
+            fprintf(filtlog[i],"\n");
+        }
+        fprintf(fspeed, "%e\t%e\n" , racer->leftSpeed , racer->rightSpeed);
         for (int i = 0; i <NLAYERS; i++){
           fprintf(wlog, "%e\t", net->getLayerWeightDistance(i));
         }
         fprintf(wlog, "%e\n", net->getWeightDistance());
-
-//        milliseconds ms = duration_cast< milliseconds >(
-//            system_clock::now().time_since_epoch()
-//        );
-//        cout << "time is: " << ms.count() << endl;
-
-        if (learningRate== DESIREDLEARNINGRATE && save == true){
-            //cout<< "Saving the WEIGHTS with learning rate: " << learningRate <<endl;
-            //net->saveWeights();
-            //fprintf(wlog, "%e\t%e\t%e\n", weightDistance1,weightDistance2,weightDistance3);
-        }
-        net->setInputs(pred_pointer);
-        net->propInputs();
-        double Output= net->getOutput(0) + 2 * net->getOutput(1);
-        double error2 = error + Output * Netgain;
-        racer->leftSpeed  = speed + error2;
-        racer->rightSpeed = speed - error2;
-        double overallspeed = racer->leftSpeed + racer->rightSpeed ;
-//        cout << net->getOutput(0) << " " << net->getOutput(1) << endl;
-        fprintf(fspeed, "%e\t%e\t%e\n" , racer->leftSpeed , racer->rightSpeed, overallspeed);
 #endif
-
-
+        fprintf(fcoord,"%e\t%e\n",racer->pos.x,racer->pos.y);
         countSteps ++;
         if (countSteps == STEPSCOUNT){
+            cout<< "exiting program: total number of steps is achieved" <<endl;
             qApp->quit();
         }
-
-#ifdef experimentSweep
-        countSteps ++;
-        if (countSteps == STEPSCOUNT){
-            //cout << save << endl;
-            save = false;
-            countSteps =0;
-            fprintf(errorlog, "\n");
-            countRuns ++;
-            racer->pos = Point(maxx/2 +30, maxy/2 +5);
-            racer->angle=0;
-            racer->leftSpeed = speed;
-            racer->rightSpeed = speed;
-#ifdef learning
-            net->initNetwork(Neuron::W_RANDOM, Neuron::B_NONE, Neuron::Act_Sigmoid);
-#endif
-            if (countRuns == RUNSCOUNT){
-#ifdef learning
-                countRuns =0;
-                learningRateCount ++;
-                learningRate = learningRate / 10;
-                net->setLearningRate(learningRate);
-                cout<< "learning rate is: "<< learningRate<< " now!"<< endl;
-                if (learningRate == DESIREDLEARNINGRATE){
-                    save = true;
-                    cout<< "Saving now" <<endl;
-                }
-                if (learningRateCount == LEARNINGRATECOUNT){
-                    qApp->quit();
-                }
-
-#endif
-#ifdef reflex
-                qApp->quit();
-#endif
-            }
-        }
-#endif
+//        milliseconds ms = duration_cast< milliseconds >(system_clock::now().time_since_epoch());
+//        cout << "time is: " << ms.count() << endl;
 	}
 };
 
