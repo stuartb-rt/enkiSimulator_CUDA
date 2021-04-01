@@ -114,6 +114,7 @@ protected:
     double maxT = MAXT;
     double dampingCoeff = DAMPINGCOEFF;
 
+
     FILE** filtlog = nullptr;
     FILE* predlog = nullptr;
     FILE* stats = nullptr;
@@ -187,11 +188,13 @@ public:
             }
         }
 
+
+
         int NetnInputs = nPredictors * nFilters;
         int nLayers= NLAYERS;
-        int nNeurons[11]={N1,N2,N3,N4,N5,N6,N7,N8,N9,N10,N11};
+        int nNeurons[NLAYERS]={N1,N2,N3};
         int* nNeuronsp=nNeurons;
-        net = new Net(nLayers, nNeuronsp, NetnInputs, 2); // the last argument defines how many error propagations the network will perform
+        net = new Net(nLayers, nNeuronsp, NetnInputs, 2);
         net->initNetwork(Neuron::W_RANDOM, Neuron::B_NONE, Neuron::Act_Sigmoid);
         net->setLearningRate(learningRate);
         cout << "learning rate is: "<< learningRate<< " now!" << endl;
@@ -315,16 +318,16 @@ virtual void sceneCompletedHook()
 
         double leadError=error;
 
-//        std::vector<int> injectionLayers;
-//            injectionLayers.reserve(7);
-//            injectionLayers = {8,9,2,6,3,5,0};
+        std::vector<int> injectionLayers;
+            injectionLayers.reserve(NLAYERS);
+            injectionLayers = {2,1,0};
 
-//        net->masterPropagate(injectionLayers, 0,
-//                                     Net::BACKWARD, leadError,
-//                                     Neuron::Sign);
-//        net->masterPropagate(injectionLayers, 1,
-//                                     Net::FORWARD, leadError,
-//                                     Neuron::Absolute);
+        net->masterPropagate(injectionLayers, 0,
+                                     Net::BACKWARD, leadError,
+                                     Neuron::Sign);
+        net->masterPropagate(injectionLayers, 1,
+                                     Net::FORWARD, leadError,
+                                     Neuron::Absolute);
         net->updateWeights();
         for (int i = 0; i <NLAYERS; i++){
           fprintf(wlog, "%e\t", net->getLayerWeightDistance(i));
@@ -345,14 +348,13 @@ virtual void sceneCompletedHook()
         net->propInputs();
         double Output= net->getOutput(0) + 2 * net->getOutput(1);
         double error2 = error + Output * Netgain;
-        double leftVelocity = 5 * net->getOutput(0) + 3 * net->getOutput(1) + 1 * net->getOutput(2);
-        double rightVelocity = 5 * net->getOutput(3) + 3 * net->getOutput(4) + 1 * net->getOutput(5);
-        racer->leftSpeed  = speed + error + 2 * leftVelocity;
-        racer->rightSpeed = speed - error + 2 * rightVelocity;
+        racer->leftSpeed  = speed + error2;
+        racer->rightSpeed = speed - error2;
         double overallspeed = racer->leftSpeed + racer->rightSpeed ;
-        //cout << racer->leftSpeed << " " << racer->rightSpeed << endl;
-        fprintf(fspeed, "%e\t%e\t%e\t%e\t%e\n" , racer->leftSpeed , racer->rightSpeed, overallspeed, leftVelocity, rightVelocity);
+//        cout << net->getOutput(0) << " " << net->getOutput(1) << endl;
+        fprintf(fspeed, "%e\t%e\t%e\n" , racer->leftSpeed , racer->rightSpeed, overallspeed);
 #endif
+
 
         countSteps ++;
         if (countSteps == STEPSCOUNT){

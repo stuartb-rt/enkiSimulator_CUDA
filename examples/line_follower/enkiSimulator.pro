@@ -3,6 +3,7 @@ TARGET = enkisimulator
 INCLUDEPATH += .
 
 INCLUDEPATH += /usr/local/include/enki
+#INCLUDEPATH += /home/sama/Documents/CLDL/include
 
 # Input
 HEADERS += Racer.h \
@@ -20,12 +21,13 @@ QMAKE_CXXFLAGS += -std=c++0x -march=native -Wunused -pedantic -lenki
 QMAKE_LFLAGS += -lenki
 
 LIBS	+= /usr/local/lib/libenki.a
+#LIBS    += /home/sama/Documents/CLDL/libcldl.a
 LIBS	+= /usr/local/lib/libcldl_static.a
 
-copydata.commands = $(COPY_DIR) $$PWD/cc.png $$OUT_PWD
+#copydata.commands = $(COPY_DIR) $$PWD/cc.png $$OUT_PWD
 
-first.depends = $(first) copydata
-export(first.depends)
-export(copydata.commands)
-QMAKE_EXTRA_TARGETS += first copydata
+#first.depends = $(first) copydata
+#export(first.depends)
+#export(copydata.commands)
+#QMAKE_EXTRA_TARGETS += first copydata
 

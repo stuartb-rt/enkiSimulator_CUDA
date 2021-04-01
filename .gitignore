@@ -36,3 +36,17 @@ ui_*.h
 # QtCtreator CMake
 CMakeLists.txt.user*
 
+
+*.tsv
+
+examples/line_follower/Makefile
+
+*.stash
+
+examples/line_follower/enkisimulator
+
+enki/Makefile
+
+.idea/
+
+.gitmodules

@@ -32,27 +32,13 @@
 #define DAMPINGCOEFF 0.51
 
 // Network Structure
-#define BCOEFF 0.0
-#define MCOEFF 0.0
-#define FCOEFF 0.0
-#define GCOEFF 0.0
-#define LCOEFF 0.0
-#define ECOEFF 0.0
 #define StartLEARNINGRATE 0.1
 #define DESIREDLEARNINGRATE 0.01
 
-#define NLAYERS 11
-    #define N1 2
-    #define N2 11
-    #define N3 11
-    #define N4 11
-    #define N5 11
-    #define N6 11
-    #define N7 11
-    #define N8 11
-    #define N9 11
-    #define N10 2
-    #define N11 6
+#define NLAYERS 3
+    #define N1 6
+    #define N2 4
+    #define N3 2
 
 // Robot speed
 #define SPEED 30 // for reflex it is 60
