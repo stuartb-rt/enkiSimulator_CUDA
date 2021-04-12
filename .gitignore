@@ -50,3 +50,21 @@ enki/Makefile
 .idea/
 
 .gitmodules
+
+examples/line_follower/coordData
+
+examples/line_follower/error_signal
+
+examples/line_follower/layer1
+
+examples/line_follower/predictor15
+
+examples/line_follower/predictor16
+
+examples/line_follower/predictor17
+
+examples/line_follower/predictor18
+
+examples/line_follower/predictor19
+
+examples/line_follower/predictor2

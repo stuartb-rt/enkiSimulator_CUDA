@@ -3,15 +3,23 @@
 
 #endif // PARAMETERS_H
 
-#define STEPSCOUNT 100
-#define LEARNINGRATECOUNT 5
+#define STEPSCOUNT 5000
 // Network Structure
-#define LEARNINGRATE 0.01
+#define nPROPAGATIONS 1
+#define LEARNINGRATE 0.1
 
-#define NLAYERS 3
-    #define N1 6
-    #define N2 4
-    #define N3 2
+#define NLAYERS 11
+    #define N1 22
+    #define N2 20
+    #define N3 18
+    #define N4 16
+    #define N5 14
+    #define N6 12
+    #define N7 10
+    #define N8 8
+    #define N9 6
+    #define N10 4
+    #define N11 2
 
 // Predictor Array
 #define ROW1P 12

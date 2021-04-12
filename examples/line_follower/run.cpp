@@ -99,16 +99,14 @@ public:
 		EnkiWidget(world, parent)
 	{
         racer = new Racer(nInputs);
-        racer->pos = Point(maxx/2 +30, maxy/2 +5); // x and y of the start point
+        racer->pos = Point(maxx/2 +35, maxy/2 +5); // x and y of the start point
         racer->leftSpeed = speed;
         racer->rightSpeed = speed;
         world->addObject(racer);
 
-#ifdef reflex
-        errorlog = fopen("errorReflex.tsv","wt");
-        fcoord = fopen("coordReflex.tsv","wt");
-        fspeed = fopen ("speedsReflex.tsv","wt");
-#endif
+        fcoord = fopen("coordData.tsv","wt");
+        errorlog = fopen("errorData.tsv","wt");
+        fspeed = fopen ("speeds.tsv","wt");
 
 #ifdef learning
         filtlog = new FILE*[NFILTERS];
@@ -117,13 +115,10 @@ public:
         filtlog[2]= fopen("fp3.tsv","wt");
         filtlog[3]= fopen("fp4.tsv","wt");
         filtlog[4]= fopen("fp5.tsv","wt");
-        errorlog = fopen("errorLearning.tsv","wt");
-        fcoord = fopen("coordLearning.tsv","wt");
         predlog = fopen("predictors.tsv","wt");
         stats = fopen("stats.tsv", "wt");
         wlog = fopen("weight_distances.tsv", "wt");
         gradientlog = fopen("gradient.tsv","wt");
-        fspeed = fopen ("speeds.tsv","wt");
         racer->setPreds(ROW1P,ROW1N,ROW1S);
         racer->setPreds(ROW2P,ROW2N,ROW2S);
         racer->setPreds(ROW3P,ROW3N,ROW3S);
@@ -156,9 +151,9 @@ public:
         }
         int NetnInputs = nPredictors * NFILTERS;
         int nLayers= NLAYERS;
-        int nNeurons[NLAYERS]={N1,N2,N3};
+        int nNeurons[NLAYERS]={N1,N2,N3,N4,N5,N6,N7,N8,N9,N10,N11};
         int* nNeuronsp=nNeurons;
-        net = new Net(nLayers, nNeuronsp, NetnInputs, 2);
+        net = new Net(nLayers, nNeuronsp, NetnInputs, nPROPAGATIONS);
         net->initNetwork(Neuron::W_RANDOM, Neuron::B_NONE, Neuron::Act_Sigmoid);
         net->setLearningRate(LEARNINGRATE);
         pred = new double[nInputs];
@@ -192,6 +187,7 @@ virtual void sceneCompletedHook()
         double error = (leftGround - rightGround) * ERRORGAIN;
         fprintf(errorlog, "%e\t", error);
 
+
 #ifdef reflex
         racer->leftSpeed  = speed + error;
         racer->rightSpeed = speed - error;
@@ -216,22 +212,22 @@ virtual void sceneCompletedHook()
             net->propInputs();
             firstStep = 0;
         }
-
         std::vector<int> injectionLayers;
             injectionLayers.reserve(NLAYERS);
-            injectionLayers = {2,1,0};
+            injectionLayers = {NLAYERS-1};
 
         net->masterPropagate(injectionLayers, 0,
                                      Net::BACKWARD, error,
-                                     Neuron::Sign);
-        net->masterPropagate(injectionLayers, 1,
-                                     Net::FORWARD, error,
-                                     Neuron::Absolute);
+                                     Neuron::Value);
+//        net->masterPropagate(injectionLayers, 1,
+//                                     Net::FORWARD, error,
+//                                     Neuron::Absolute);
         net->updateWeights();
         net->setInputs(pred_pointer);
         net->propInputs();
 
-        double Output= net->getOutput(0) + 2 * net->getOutput(1);
+
+        double Output= net->getOutput(0) + 5 * net->getOutput(1);
         double error2 = error + Output * NETWORKGAIN;
         racer->leftSpeed  = speed + error2;
         racer->rightSpeed = speed - error2;
@@ -241,24 +237,32 @@ virtual void sceneCompletedHook()
             fprintf(predlog,"%e\t",pred[i]);
         }
         fprintf(predlog,"\n");
-        for (int i=0; i<NFILTERS; i++){
-            fprintf(filtlog[i],"\n");
+
+        for (int f = 0; f<NFILTERS; f++){
+            for (int p = 0; p<nPredictors; p++){
+                fprintf(filtlog[f],"%e\t",pred_filtered[p][f]);
+            }
+            fprintf(filtlog[f],"\n");
         }
         fprintf(fspeed, "%e\t%e\n" , racer->leftSpeed , racer->rightSpeed);
         for (int i = 0; i <NLAYERS; i++){
           fprintf(wlog, "%e\t", net->getLayerWeightDistance(i));
         }
         fprintf(wlog, "%e\n", net->getWeightDistance());
+
+        net->snapFistLayerWeights();
 #endif
         fprintf(fcoord,"%e\t%e\n",racer->pos.x,racer->pos.y);
         countSteps ++;
+
+
         if (countSteps == STEPSCOUNT){
             cout<< "exiting program: total number of steps is achieved" <<endl;
             qApp->quit();
         }
 //        milliseconds ms = duration_cast< milliseconds >(system_clock::now().time_since_epoch());
 //        cout << "time is: " << ms.count() << endl;
-	}
+    }
 };
 
 int main(int argc, char *argv[])
@@ -274,7 +278,7 @@ int main(int argc, char *argv[])
     const uint32_t *bits = (const uint32_t*)gt.constBits();
     World world(maxx, maxy,
                 Color(1000, 1000, 1000), World::GroundTexture(gt.width(), gt.height(), bits));
-    cout<<gt.width()<<" "<<gt.height()<<endl;
+//    cout<<gt.width()<<" "<<gt.height()<<endl;
     EnkiPlayground viewer(&world);
     viewer.show();
     return app.exec();

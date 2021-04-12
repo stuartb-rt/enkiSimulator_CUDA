@@ -9,8 +9,8 @@ import numpy as np
 import matplotlib.pylab as plt
 import matplotlib as mpl
 
-path='/home/sama/Documents/enki-1/examples/build-playground-Desktop-Debug/'
-spath='/home/sama/Documents/publications/sharedCorel/'
+path='/home/sama/Documents/enkiSimulator/examples/build-enkiSimulator-Desktop-Debug/'
+spath='./'
 
 sizeY=3
 ratioYX=4
@@ -89,7 +89,7 @@ class layer():
     
     def __init__ (self, name):
         self.name=name
-        self.data=np.loadtxt('{}layerWeight{}.txt'.format(path, self.name))
+        self.data=np.loadtxt('{}wL{}.csv'.format(path, self.name))
         self.data=self.data/(np.amax(abs(self.data)))
         self.numNeurons=self.data.shape[0]
         self.numInputs=self.data.shape[1]
@@ -115,7 +115,7 @@ class finalLayer():
     
     def __init__ (self, name):
         self.name=name
-        self.dataRaw=np.loadtxt('{}layerWeight{}.txt'.format(path, self.name))
+        self.dataRaw=np.loadtxt('{}wL{}.csv'.format(path, self.name))
         self.data=np.array([self.dataRaw,self.dataRaw])
         self.numInputs=self.data.shape[0]
         self.numNeurons=1
