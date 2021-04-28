@@ -153,8 +153,9 @@ public:
         int nLayers= NLAYERS;
         int nNeurons[NLAYERS]={N1,N2,N3,N4,N5,N6,N7,N8,N9,N10,N11};
         int* nNeuronsp=nNeurons;
-        net = new Net(nLayers, nNeuronsp, NetnInputs, nPROPAGATIONS);
-        net->initNetwork(Neuron::W_RANDOM, Neuron::B_NONE, Neuron::Act_Sigmoid);
+        //net = new Net(nLayers, nNeuronsp, NetnInputs, nPROPAGATIONS);	//original CLDL
+        net = new Net(nLayers, nNeuronsp, NetnInputs);	//CLDL_CUDA
+        net->initNetwork(Neuron::W_ZEROS, Neuron::B_NONE, Neuron::Act_Sigmoid);
         net->setLearningRate(LEARNINGRATE);
         pred = new double[nInputs];
         fprintf(stats, "%d\n", nPredictors);
@@ -212,16 +213,21 @@ virtual void sceneCompletedHook()
             net->propInputs();
             firstStep = 0;
         }
+
+        net->setBackwardError(error);
+        net->propErrorBackward();
+
         std::vector<int> injectionLayers;
             injectionLayers.reserve(NLAYERS);
             injectionLayers = {NLAYERS-1};
 
-        net->masterPropagate(injectionLayers, 0,
-                                     Net::BACKWARD, error,
-                                     Neuron::Value);
-//        net->masterPropagate(injectionLayers, 1,
-//                                     Net::FORWARD, error,
-//                                     Neuron::Absolute);
+        //net->masterPropagate(injectionLayers, 0,
+        //                             Net::BACKWARD, error,
+        //                             Neuron::Value);
+        //net->masterPropagate(injectionLayers, 1,
+        //                             Net::FORWARD, error,
+        //                             Neuron::Absolute);
+
         net->updateWeights();
         net->setInputs(pred_pointer);
         net->propInputs();
@@ -245,12 +251,12 @@ virtual void sceneCompletedHook()
             fprintf(filtlog[f],"\n");
         }
         fprintf(fspeed, "%e\t%e\n" , racer->leftSpeed , racer->rightSpeed);
-        for (int i = 0; i <NLAYERS; i++){
-          fprintf(wlog, "%e\t", net->getLayerWeightDistance(i));
-        }
-        fprintf(wlog, "%e\n", net->getWeightDistance());
+        //for (int i = 0; i <NLAYERS; i++){
+        //  fprintf(wlog, "%e\t", net->getLayerWeightDistance(i));
+        //}
+        //fprintf(wlog, "%e\n", net->getWeightDistance());
 
-        net->snapFistLayerWeights();
+        //net->snapFistLayerWeights();
 #endif
         fprintf(fcoord,"%e\t%e\n",racer->pos.x,racer->pos.y);
         countSteps ++;

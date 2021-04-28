@@ -3,7 +3,8 @@ TARGET = enkisimulator
 INCLUDEPATH += .
 
 INCLUDEPATH += /usr/local/include/enki
-#INCLUDEPATH += /home/sama/Documents/CLDL/include
+#INCLUDEPATH += /home/sama/Documents/CLDL/include		#original CLDL headers
+INCLUDEPATH += /home/sama/CLDL_CUDA/include			#CLDL_CUDA headers
 
 # Input
 HEADERS += Racer.h \
@@ -21,8 +22,9 @@ QMAKE_CXXFLAGS += -std=c++0x -march=native -Wunused -pedantic -lenki
 QMAKE_LFLAGS += -lenki
 
 LIBS	+= /usr/local/lib/libenki.a
-#LIBS    += /home/sama/Documents/CLDL/libcldl.a
-LIBS	+= /usr/local/lib/libcldl_static.a
+#LIBS	+= /usr/local/lib/libCLDL_STATIC.a
+#LIBS    += /home/sama/Documents/CLDL/libcldl_static.a		#original CLDL lib
+LIBS    += /home/sama/CLDL_CUDA/libCLDL_STATIC.a		#CLDL_CUDA lib
 
 #copydata.commands = $(COPY_DIR) $$PWD/cc.png $$OUT_PWD
 
