@@ -21,11 +21,6 @@ CONFIG          += qt warn_on debuge debug
 QMAKE_CXXFLAGS += -std=c++0x -march=native -Wunused -pedantic -lenki
 QMAKE_LFLAGS += -lenki
 
-CUDA_DIR = /usr/local/cuda
-INCLUDEPATH  += $$CUDA_DIR/include
-QMAKE_LIBDIR += $$CUDA_DIR/lib64
-LIBS += -lcudart -lcuda
-
 LIBS	+= /usr/local/lib/libenki.a
 #LIBS	+= /usr/local/lib/libCLDL_STATIC.a
 #LIBS    += /home/sama/Documents/CLDL/libcldl_static.a		#original CLDL lib
