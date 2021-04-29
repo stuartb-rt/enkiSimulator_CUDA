@@ -4,11 +4,11 @@ INCLUDEPATH += .
 
 CUDA_DIR = $$system(which nvcc | sed 's,/bin/nvcc$,,')
 
+#INCLUDEPATH += $$CUDA_DIR/include				# Causes stdlib.h to go missing
+#QMAKE_LIBDIR += $$CUDA_DIR/lib					# Seems to be unnecessary for cuda stuff 
 INCLUDEPATH += /usr/local/include/enki
 #INCLUDEPATH += /home/sama/Documents/CLDL/include		#original CLDL headers
 INCLUDEPATH += /home/sama/CLDL_CUDA/include			#CLDL_CUDA headers
-INCLUDEPATH += $$CUDA_DIR/include
-QMAKE_LIBDIR += $$CUDA_DIR/lib
 
 # Input
 HEADERS += Racer.h \
@@ -21,7 +21,7 @@ SOURCES += run.cpp \
     bandpass.cpp
 
 QT += opengl widgets
-CONFIG          += qt warn_on debuge debug
+CONFIG += qt warn_on debuge debug
 QMAKE_CXXFLAGS += -std=c++0x -march=native -Wunused -pedantic -lenki
 QMAKE_LFLAGS += -lenki
 
@@ -29,7 +29,6 @@ LIBS	+= /usr/local/lib/libenki.a
 #LIBS	+= /usr/local/lib/libCLDL_STATIC.a
 #LIBS    += /home/sama/Documents/CLDL/libcldl_static.a		#original CLDL lib
 LIBS    += /home/sama/CLDL_CUDA/libCLDL.a		#CLDL_CUDA lib
-
 LIBS += -lcudart
 
 cuda.output = ${OBJECTS_DIR}${QMAKE_FILE_BASE}_cuda.obj
@@ -47,3 +46,4 @@ QMAKE_EXTRA_UNIX_COMPILERS += cuda
 #export(first.depends)
 #export(copydata.commands)
 #QMAKE_EXTRA_TARGETS += first copydata
+
