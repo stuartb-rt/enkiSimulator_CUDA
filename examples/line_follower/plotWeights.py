@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pylab as plt
 
 
-path='/home/sama/Documents/enkiSimulator/examples/build-enkiSimulator-Desktop-Debug/'
+path='/home/sama/enkiSimulator_CUDA/examples/line_follower/'
 spath='./'
 
 sizeY=3

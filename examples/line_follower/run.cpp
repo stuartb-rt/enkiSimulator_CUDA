@@ -155,7 +155,7 @@ public:
         int* nNeuronsp=nNeurons;
         //net = new Net(nLayers, nNeuronsp, NetnInputs, nPROPAGATIONS);	//original CLDL
         net = new Net(nLayers, nNeuronsp, NetnInputs);	//CLDL_CUDA
-        net->initNetwork(Neuron::W_ZEROS, Neuron::B_NONE, Neuron::Act_Sigmoid);
+        net->initNetwork(Neuron::W_RANDOM, Neuron::B_NONE, Neuron::Act_Sigmoid);
         net->setLearningRate(LEARNINGRATE);
         pred = new double[nInputs];
         fprintf(stats, "%d\n", nPredictors);
@@ -213,13 +213,14 @@ virtual void sceneCompletedHook()
             net->propInputs();
             firstStep = 0;
         }
+        net->setErrorCoeff(0,1,0,0,0,0);
 
         net->setBackwardError(error);
         net->propErrorBackward();
 
-        std::vector<int> injectionLayers;
-            injectionLayers.reserve(NLAYERS);
-            injectionLayers = {NLAYERS-1};
+//        std::vector<int> injectionLayers;
+//            injectionLayers.reserve(NLAYERS);
+//            injectionLayers = {NLAYERS-1};
 
         //net->masterPropagate(injectionLayers, 0,
         //                             Net::BACKWARD, error,
@@ -233,7 +234,7 @@ virtual void sceneCompletedHook()
         net->propInputs();
 
 
-        double Output= net->getOutput(0) + 5 * net->getOutput(1);
+        double Output= net->getOutput(0) + 2 * net->getOutput(1);
         double error2 = error + Output * NETWORKGAIN;
         racer->leftSpeed  = speed + error2;
         racer->rightSpeed = speed - error2;

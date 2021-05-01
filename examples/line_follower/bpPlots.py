@@ -13,7 +13,7 @@ import matplotlib.image as mpimg
 plt.rcParams['font.family'] = 'serif'
 plt.rcParams.update({'font.size': 9})
 
-path='/home/sama/Documents/enkiSimulator/examples/build-enkiSimulator-Desktop-Debug/'
+path='/home/sama/enkiSimulator_CUDA/examples/line_follower/'
 spath='./'
 #sizeY=3
 #ratioYX=4
@@ -66,7 +66,7 @@ nLayers = len(numLayerNeurons)
 
 wch=np.loadtxt('{}weight_distances.tsv'.format(path));# error=errordata[:,0]
 wch1=wch[:,nLayers]
-#wch2=wch[:,1]
+#wch2=wch[:]
 #wch3=wch[:,2]
 #maxW1=max(abs(wch[:,0])); maxW2=max(abs(wch[:,1])); maxW3=max(abs(wch[:,2]));
 #maxW=max(maxW1,maxW2,maxW3)
