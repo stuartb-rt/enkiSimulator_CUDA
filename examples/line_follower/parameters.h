@@ -3,7 +3,7 @@
 
 #endif // PARAMETERS_H
 
-#define STEPSCOUNT 5000
+#define STEPSCOUNT 2000
 // Network Structure
 #define nPROPAGATIONS 1
 #define LEARNINGRATE 0.1
