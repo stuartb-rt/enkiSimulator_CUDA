@@ -67,7 +67,6 @@ double	maxy = 250;
 
 int countSteps=0;
 int firstStep = 1; //so that it does propInputs once and then back/forth in that order
-int firstWeightUpdate = 1;
 int nInputs= ROW1N+ROW2N+ROW3N;
 #ifdef learning
     int nPredictors=nInputs;
@@ -154,11 +153,11 @@ public:
         int nLayers= NLAYERS;
         int nNeurons[NLAYERS]={N1,N2,N3,N4,N5,N6,N7,N8,N9,N10,N11};
         int* nNeuronsp=nNeurons;
-        //net = new Net(nLayers, nNeuronsp, NetnInputs, nPROPAGATIONS);	//original CLDL
-        net = new Net(nLayers, nNeuronsp, NetnInputs);	//CLDL_CUDA
+        net = new Net(nLayers, nNeuronsp, NetnInputs);
         net->initNetwork(Neuron::W_RANDOM, Neuron::B_NONE, Neuron::Act_Sigmoid);
-        net->printInitialWeights();
+        //net->printInitialWeights();
         net->setLearningRate(LEARNINGRATE);
+        net->setErrorCoeff(0,1,0,0,0,0);
  
         pred = new double[nInputs];
         fprintf(stats, "%d\n", nPredictors);
@@ -215,13 +214,10 @@ virtual void sceneCompletedHook()
             //printf("First step\n");   
             net->setInputs(pred_pointer);                 
             net->propInputs();
-            //printf("First weight update\n");
-            net->printWeights();
+            //net->printWeights();
             firstStep = 0;
         }
         
-        net->setErrorCoeff(0,1,0,0,0,0);
-
         net->setBackwardError(error);
         net->propErrorBackward();
 
@@ -237,7 +233,7 @@ virtual void sceneCompletedHook()
         //                             Neuron::Absolute);
 
         net->updateWeights();
-        net->printWeights();
+        //net->printWeights();
         net->setInputs(pred_pointer);        
         net->propInputs();
 
