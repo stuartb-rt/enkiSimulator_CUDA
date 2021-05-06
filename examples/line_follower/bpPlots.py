@@ -29,6 +29,8 @@ errorNorm=error #/maxE
 errorfig=plt.figure('error')
 axe=errorfig.add_subplot(111)
 plt.plot(error, color='black', linestyle="-", linewidth=0.5)
+plt.xlabel("Step Count")
+plt.ylabel("Closed-Loop Error")
 #plt.ylim(-0.3, 0.3)
 #plt.yticks([-0.2, -0.1, 0, 0.1, 0.2])
 #plt.xticks(np.arange(0,len(error),250))
