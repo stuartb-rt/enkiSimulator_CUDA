@@ -14,8 +14,13 @@ a fast 2D robot simulator using the QT5 build system.
 
 You need the QT5 library and its development packages to compile it.
 
+The line follower is designed to run with the CUDA-based CLDL algorithm. 
+
+Both the CUDA development packages and the compiled CUDA-CLDL library are required to compile the line-follower.
 
 ## Enki simulator compilation under Unix (library)
+
+The enkiSimulator.pro file must be modified to point towards the compiled CUDA-CLDL libraries.
 
 Change into the enki subdirectory and type:
 
@@ -36,8 +41,4 @@ To compile the examples you need to do again `qmake` and `make`. This uses the
 previously compiled enki library.
 
 To run it type, for example, `./playground`
-
-## Citation
-
-[![DOI](https://zenodo.org/badge/234632641.svg)](https://zenodo.org/badge/latestdoi/234632641)
 
