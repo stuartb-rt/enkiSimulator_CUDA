@@ -42,3 +42,5 @@ previously compiled enki library.
 
 To run it type, for example, `./playground`
 
+To run the line follower example, navigate to examples/line_follower, then type `./enkisimulator`
+
