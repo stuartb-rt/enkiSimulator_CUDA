@@ -14,7 +14,7 @@ A fast 2D robot simulator using the QT5 build system.
 
 You need the QT5 library and its development packages to compile it.
 
-The line follower is designed to run with the [CUDA-based CLDL algorithm](https://github.com/domrest/CLDL_CUDA). 
+The line follower example is designed to run with the [CUDA-based CLDL algorithm](https://github.com/domrest/CLDL_CUDA). 
 
 Both the CUDA development packages and the compiled CUDA-CLDL library are required to compile the line-follower.
 
