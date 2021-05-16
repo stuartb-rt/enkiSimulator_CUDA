@@ -1,6 +1,6 @@
 # Enki (QT5)
 
-a fast 2D robot simulator using the QT5 build system.
+A fast 2D robot simulator using the QT5 build system.
 
 © 1999-2017 Stéphane Magnenat and others ([full list](AUTHORS))
 
@@ -14,13 +14,13 @@ a fast 2D robot simulator using the QT5 build system.
 
 You need the QT5 library and its development packages to compile it.
 
-The line follower is designed to run with the CUDA-based CLDL algorithm. 
+The line follower is designed to run with the [CUDA-based CLDL algorithm](https://github.com/domrest/CLDL_CUDA). 
 
 Both the CUDA development packages and the compiled CUDA-CLDL library are required to compile the line-follower.
 
 ## Enki simulator compilation under Unix (library)
 
-The enkiSimulator.pro file must be modified to point towards the compiled CUDA-CLDL libraries.
+To use the CUDA CLDL library with the line follower example, the enkiSimulator.pro file in the examples/line_follower directory must be modified to point towards the compiled CUDA-CLDL library.
 
 Change into the enki subdirectory and type:
 
